@@ -1,23 +1,22 @@
-# 使用輕量級 Python 鏡像
 FROM python:3.10-slim
 
-# 設定工作目錄
 WORKDIR /app
 
-# 安裝系統依賴 (如果 nanoclaw 需要編譯某些套件)
+# 安裝基本依賴
 RUN apt-get update && apt-get install -y \
-    build-essential \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# 複製需求文件並安裝
+# 複製並安裝 Python 套件
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 複製所有專案文件
+# 複製程式碼
 COPY . .
 
-# 暴露 FastAPI 預設埠口
+# 設定環境變數 (Zeabur 會自動對應到 8000 port)
+ENV PORT=8000
 EXPOSE 8000
 
-# 啟動指令 (根據 nanoclaw 的進入點調整)
+# 啟動指令：使用 uvicorn 執行 main.py 裡的 app
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
